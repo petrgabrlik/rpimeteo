@@ -1,0 +1,17 @@
+<html>
+
+    <head>
+        <title>{{ title }} - Raspberry Pi Meteo</title>
+    </head>
+
+    <body>
+        <div style="text-align: center; font-size: 250%">
+            {{ time }}
+            <br>
+            {{ '%0.2f' % temp|float }} °C
+            <br>
+            {{ '%0.2f' % hum|float }} %
+        </div>
+    </body>
+
+</html>
