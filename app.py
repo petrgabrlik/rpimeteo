@@ -1,10 +1,13 @@
+'''
+'''
+
 from smbus2 import SMBusWrapper
 import time
 
 ADDR = 0x27
 
 
-def get_data():
+def get_hih8120_data():
     '''
     Get humidity and temperature data from HIH8120 sensor (I2C)
     '''
@@ -23,10 +26,11 @@ def get_data():
     	bytes = 4
     	data = bus.read_i2c_block_data(ADDR, offset, bytes)
 
-    return data
+    pdata = parse_hih8120_data(data)
+    return pdata
 
 
-def parse_data(data):
+def parse_hih8120_data(data):
     '''
     Parse and convert hum and temp data to physical units.
     '''
@@ -42,26 +46,35 @@ def parse_data(data):
     return {'hum': hum, 'temp': temp}
 
 
+def get_data():
+    '''
+    Get all meteo data, intended for API call
+    '''
+    pdata = get_hih8120_data()
+    pdata['time'] = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime())
+    return pdata
+
+
 def save_to_txt(pdata):
     '''
     '''
     print('{:}\t{:.2f}\t{:.2f}'.format(pdata['time'], pdata['hum'], pdata['temp']), file=open('log.txt', 'a'))
 
 
-
 def main():
     '''
     '''
     while True:
-        data = get_data()
-        pdata = parse_data(data)
-        pdata['time'] = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime())
+        # pdata = get_hih8120_data()
+        # pdata = parse_hih8120_data(data)
+        # pdata['time'] = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime())
+        pdata = get_data()
         save_to_txt(pdata)
         # print('raw: {:}'.format(data))
         # print(time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime()))
         print('{:} h={:.2f} % t={:.2f} C'.format(pdata['time'], pdata['hum'], pdata['temp']))
         # print(pdata)
-        time.sleep(1)
+        time.sleep(60)
 
 
 if __name__ == '__main__':
