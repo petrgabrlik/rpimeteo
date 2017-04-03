@@ -1,0 +1,6 @@
+# virtual environment
+**/venv
+
+# database and flat files
+database.db
+log.txt
