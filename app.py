@@ -3,6 +3,7 @@
 
 from smbus2 import SMBusWrapper
 import time
+import sqlite3
 
 ADDR = 0x27
 
@@ -64,17 +65,21 @@ def save_to_txt(pdata):
 def main():
     '''
     '''
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+    c.execute('''CREATE TABLE IF NOT EXISTS meteo (date text, temp real, hum real)''')
+
     while True:
-        # pdata = get_hih8120_data()
-        # pdata = parse_hih8120_data(data)
-        # pdata['time'] = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime())
         pdata = get_data()
+        c.execute('''INSERT INTO meteo VALUES (?,?,?)''',(pdata['time'], pdata['temp'], pdata['hum']))
+        conn.commit()
         save_to_txt(pdata)
-        # print('raw: {:}'.format(data))
-        # print(time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime()))
-        print('{:} h={:.2f} % t={:.2f} C'.format(pdata['time'], pdata['hum'], pdata['temp']))
-        # print(pdata)
-        time.sleep(60)
+        # print('{:} h={:.2f} % t={:.2f} C'.format(pdata['time'], pdata['hum'], pdata['temp']))
+        for row in c.execute('SELECT * FROM meteo ORDER BY date DESC LIMIT 1'):
+            print(row)
+        # print(c.execute('SELECT * FROM meteo DESC LIMIT 1'))
+        # print(c.fechone())
+        time.sleep(5)
 
 
 if __name__ == '__main__':
