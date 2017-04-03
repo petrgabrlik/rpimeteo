@@ -4,7 +4,7 @@
 from smbus2 import SMBusWrapper
 import time
 import sqlite3
-import matplotlib
+# import matplotlib
 
 ADDR = 0x27
 
