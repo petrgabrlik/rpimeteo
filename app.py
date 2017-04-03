@@ -4,6 +4,7 @@
 from smbus2 import SMBusWrapper
 import time
 import sqlite3
+import matplotlib
 
 ADDR = 0x27
 
@@ -58,12 +59,21 @@ def get_data():
 
 def save_to_txt(pdata):
     '''
+    Save data to a flat file.
     '''
     print('{:}\t{:.2f}\t{:.2f}'.format(pdata['time'], pdata['hum'], pdata['temp']), file=open('log.txt', 'a'))
 
 
+def save_to_db(pdata):
+    '''
+    Save data to database.
+    '''
+
+
+
 def main():
     '''
+    Main application.
     '''
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
@@ -75,10 +85,13 @@ def main():
         conn.commit()
         save_to_txt(pdata)
         # print('{:} h={:.2f} % t={:.2f} C'.format(pdata['time'], pdata['hum'], pdata['temp']))
+        # conn.row_factory = sqlite3.Row
+        # c = conn.cursor()
+        # c.execute('SELECT * FROM meteo ORDER BY date DESC LIMIT 1')
+        # r = c.fetchone()
+        # print(r)
         for row in c.execute('SELECT * FROM meteo ORDER BY date DESC LIMIT 1'):
             print(row)
-        # print(c.execute('SELECT * FROM meteo DESC LIMIT 1'))
-        # print(c.fechone())
         time.sleep(5)
 
 
