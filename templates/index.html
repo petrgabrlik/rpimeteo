@@ -11,6 +11,8 @@
             {{ '%0.2f' % temp|float }} °C
             <br>
             {{ '%0.2f' % hum|float }} %
+            <br>
+            <img src= {{ url_for('static', filename = 'plot.png') }} >
         </div>
     </body>
 
