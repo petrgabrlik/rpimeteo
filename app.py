@@ -1,4 +1,7 @@
 '''
+Main application of Raspberry Pi meteo station.
+
+App read data from I2C hum/temp senosr, save data to SQLite database and generate plots.
 '''
 
 from smbus2 import SMBusWrapper
@@ -102,8 +105,8 @@ def generate_plot():
 
     # dates = matplotlib.dates.date2num(time)
     plt.clf()
-    plt.plot(time, temp, 'r.', label='temp')
-    plt.plot_date(time, hum, 'b.', label='hum')
+    plt.plot(time, temp, 'ro', markersize=1, label='temp')
+    plt.plot_date(time, hum, 'bo', markersize=1, label='hum')
     plt.gcf().autofmt_xdate()
     plt.grid(True)
     # plt.title('Temperature and humidity data')
@@ -113,14 +116,17 @@ def generate_plot():
 
 def print_data_from_db():
     '''
-    Print temp and hum data to the terminal.
+    Print last temp and hum data to the terminal.
 
     The data is read from the database.
     '''
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
-    for row in c.execute('''SELECT * FROM meteo WHERE date > date('now', 'start of day') '''):
-        print(row)
+    # for row in c.execute('''SELECT * FROM meteo WHERE date > date('now', 'start of day') '''):
+    #     print(row)
+    c.execute('SELECT * FROM meteo ORDER BY date DESC LIMIT 1')
+    r = c.fetchone()
+    print(r)
     conn.close()
 
 
@@ -145,7 +151,7 @@ def main():
         # save_to_txt(pdata)
         save_to_db(pdata)
         generate_plot()
-        # print_data_from_db()
+        print_data_from_db()
 
         time.sleep(60)
 

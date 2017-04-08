@@ -1,4 +1,7 @@
 '''
+Webserver and API for Raspberry Pi meteo station.
+
+Script create webserver (Flask); temp and hum data and plots are presented.
 '''
 
 from flask import Flask, render_template, request
@@ -22,6 +25,7 @@ def index():
     r = c.fetchone()
     return render_template('index.html', title='Home', temp=r['temp'], hum=r['hum'], time=r['date'])
     c.close()
+
 
 if __name__ == '__main__':
     # app.run()
