@@ -13,7 +13,8 @@
             <br>
             {{ '%0.2f' % hum|float }} %
             <br>
-            <img src= {{ url_for('static', filename = 'plot.png') }} >
+            <img src= {{ url_for('static', filename = 'plot_today.png') }} >
+            <img src= {{ url_for('static', filename = 'plot_this_week.png') }} >
         </div>
         <div style="text-align: center; font-size: 100%">
             Data from HIH8120 sensor, 1 minute sampling period, Ctrl+F5 for cache refresh (Chrome).

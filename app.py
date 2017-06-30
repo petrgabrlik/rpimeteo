@@ -83,7 +83,7 @@ def save_to_db(pdata):
     conn.close()
 
 
-def generate_plot():
+def generate_plot_today():
     '''
     Generate plot from the temp and hum data of current day.
 
@@ -94,6 +94,7 @@ def generate_plot():
     temp = []
     hum = []
     time = []
+
     # for row in c.execute("SELECT * FROM meteo WHERE date > date('now', '-10 minutes')"):
     for row in c.execute('''SELECT * FROM meteo WHERE date > date('now', 'start of day') '''):
         # print(row)
@@ -109,9 +110,39 @@ def generate_plot():
     plt.plot_date(time, hum, 'bo', markersize=1, label='hum')
     plt.gcf().autofmt_xdate()
     plt.grid(True)
-    # plt.title('Temperature and humidity data')
+    plt.title('Today')
     plt.legend(loc=2)
-    plt.savefig('static/plot.png')
+    plt.savefig('static/plot_today.png')
+
+
+def generate_plot_this_week():
+    '''
+    Generate plot from the temp and hum data of current week.
+
+    The data is read from the database.
+    '''
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+    temp = []
+    hum = []
+    time = []
+
+    for row in c.execute('''SELECT * FROM meteo WHERE date > date('now', 'weekday 0', '-7 days') '''):
+        # print(row)
+        datetime_object = datetime.strptime(row[0], '%Y-%m-%dT%H:%M:%S')
+        time.append(datetime_object)
+        temp.append(row[1])
+        hum.append(row[2])
+    conn.close()
+
+    plt.clf()
+    plt.plot(time, temp, 'ro', markersize=1, label='temp')
+    plt.plot_date(time, hum, 'bo', markersize=1, label='hum')
+    plt.gcf().autofmt_xdate()
+    plt.grid(True)
+    plt.title('This week')
+    plt.legend(loc=2)
+    plt.savefig('static/plot_this_week.png')
 
 
 def print_data_from_db():
@@ -150,7 +181,8 @@ def main():
         # conn.commit()
         # save_to_txt(pdata)
         save_to_db(pdata)
-        generate_plot()
+        generate_plot_today()
+        generate_plot_this_week()
         print_data_from_db()
 
         time.sleep(60)
