@@ -11,9 +11,9 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from datetime import datetime
+import argparse
 
 ADDR = 0x27
-
 
 def get_hih8120_data():
     '''
@@ -72,24 +72,24 @@ def save_to_txt(pdata):
     print('{:}\t{:.2f}\t{:.2f}'.format(pdata['time'], pdata['hum'], pdata['temp']), file=open('log.txt', 'a'))
 
 
-def save_to_db(pdata):
+def save_to_db(pdata, db):
     '''
     Save data to database.
     '''
-    conn = sqlite3.connect('database.db')
+    conn = sqlite3.connect(db)
     c = conn.cursor()
     c.execute('''INSERT INTO meteo VALUES (?,?,?)''', (pdata['time'], pdata['temp'], pdata['hum']))
     conn.commit()
     conn.close()
 
 
-def generate_plot_today():
+def generate_plot_today(db):
     '''
     Generate plot from the temp and hum data of current day.
 
     The data is read from the database.
     '''
-    conn = sqlite3.connect('database.db')
+    conn = sqlite3.connect(db)
     c = conn.cursor()
     temp = []
     hum = []
@@ -115,13 +115,13 @@ def generate_plot_today():
     plt.savefig('static/plot_today.png')
 
 
-def generate_plot_this_week():
+def generate_plot_this_week(db):
     '''
     Generate plot from the temp and hum data of current week.
 
     The data is read from the database.
     '''
-    conn = sqlite3.connect('database.db')
+    conn = sqlite3.connect(db)
     c = conn.cursor()
     temp = []
     hum = []
@@ -145,13 +145,13 @@ def generate_plot_this_week():
     plt.savefig('static/plot_this_week.png')
 
 
-def print_data_from_db():
+def print_data_from_db(db):
     '''
     Print last temp and hum data to the terminal.
 
     The data is read from the database.
     '''
-    conn = sqlite3.connect('database.db')
+    conn = sqlite3.connect(db)
     c = conn.cursor()
     # for row in c.execute('''SELECT * FROM meteo WHERE date > date('now', 'start of day') '''):
     #     print(row)
@@ -161,13 +161,13 @@ def print_data_from_db():
     conn.close()
 
 
-def main():
+def main(db):
     '''
     Main application.
     '''
 
     # Initialize database
-    conn = sqlite3.connect('database.db')
+    conn = sqlite3.connect(db)
     c = conn.cursor()
     c.execute('''CREATE TABLE IF NOT EXISTS meteo (date text, temp real, hum real)''')
     conn.close()
@@ -180,13 +180,21 @@ def main():
         # c.execute('''INSERT INTO meteo VALUES (?,?,?)''', (pdata['time'], pdata['temp'], pdata['hum']))
         # conn.commit()
         # save_to_txt(pdata)
-        save_to_db(pdata)
-        generate_plot_today()
-        generate_plot_this_week()
-        print_data_from_db()
+        save_to_db(pdata, db)
+        generate_plot_today(db)
+        generate_plot_this_week(db)
+        print_data_from_db(db)
 
         time.sleep(60)
 
 
 if __name__ == '__main__':
-    main()
+    # Instantiate the parser
+    parser = argparse.ArgumentParser(description='App read data from I2C hum/temp senosr, save data to SQLite database and generate plots.')
+    # Required positional argument
+    parser.add_argument('database', help='Database file')
+    # Parse
+    args = parser.parse_args()
+
+    # Run program
+    main(args.database)
